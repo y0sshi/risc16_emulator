@@ -1,0 +1,8 @@
+ADD r1 r2
+MV  r2 r3
+SUB r2 r3 label:5
+BMI r1 l5
+ADD r5 r4 //comment out
+BMI r3 l5
+JMP l5
+FINISH

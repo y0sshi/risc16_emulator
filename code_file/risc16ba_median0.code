@@ -1,0 +1,148 @@
+// ----- median filter ----- //
+// --- initialize --- //
+LUI  r0 0x80
+LUI  r1 0xc0
+LLI  r7 0x7f
+
+// --- median_0,j --- //
+LBU  r3 r0 label:0
+SBU  r3 r1
+ADDI r0 1
+ADDI r1 1
+BNEZ r7 l0
+ADDI r7 -1
+
+// --- median_i,j --- //
+LLI  r7 0x7d
+
+// - median_i,0 - //
+LBU  r3 r0
+SBU  r3 r1 label:1
+ADDI r0 1
+ADDI r1 1
+
+// - median_i,j - //
+LLI  r6 0x7d
+LBU  r3 r0
+SBU  r3 r1 label:2
+
+// initialize
+MV   r2 r0
+ADDI r2 -128 // -0x80
+LBU  r4 r2
+ADDI r2 -1 
+LBU  r5 r2
+LLI  r2 0xf0 // r3 = 0xf0
+SBU  r4 r2
+ADDI r2 1    // r3 = 0xf1
+SBU  r5 r2
+
+MV   r2 r0
+ADDI r2 -127 // -0x7f
+LBU  r4 r2
+ADDI r2 0x7e 
+LBU  r5 r2
+LLI  r2 0xf2 // r2 = 0xf2
+SBU  r4 r2
+ADDI r2 1    // r2 = 0xf3
+SBU  r5 r2
+
+LLI  r2 0xf4 // r2 = 0xf4
+SBU  r3 r2
+
+MV   r2 r0
+ADDI r2 1
+LBU  r4 r2
+ADDI r2 0x7e 
+LBU  r5 r2
+LLI  r2 0xf5 // r2 = 0xf5
+SBU  r4 r2
+ADDI r2 1    // r2 = 0xf6
+SBU  r5 r2
+
+MV   r2 r0
+ADDI r2 0x7f
+ADDI r2 1
+LBU  r4 r2
+ADDI r2 1 
+LBU  r5 r2
+LLI  r2 0xf7 // r2 = 0xf7
+SBU  r4 r2
+ADDI r2 1    // r2 = 0xf8
+SBU  r5 r2   
+ADDI r2 1    // r2 = 0xf9
+SBU  r6 r2
+ADDI r2 1    // r2 <= 0xfa
+SBU  r7 r2
+
+// sort
+LLI  r7 0x07
+LLI  r6 0x07 label:5
+MV   r2 r6 label:6
+ADDI r2 0x78
+ADDI r2 0x78 // r2 = r2 + 0xf0
+LBU  r3 r2
+ADDI r2 1
+LBU  r4 r2 // r3 <-> r4
+
+MV   r5 r4
+SUB  r5 r3
+BPL  r5 l7 // if (r3 > r4) {
+MV   r5 r3 //   swap = r3;
+MV   r3 r4 //   r3 = r4;
+MV   r4 r5 //   r4 = swap;
+SBU  r4 r2 label:7 // }
+
+ADDI r2 -1
+SBU  r3 r2
+
+BNEZ r6 l6
+ADDI r6 -1
+BNEZ r7 l5
+ADDI r7 -1
+
+// output answer
+LLI  r2 0xf4
+LBU  r3 r2
+SBU  r3 r1
+
+LLI  r2 0xf9
+LBU  r6 r2
+ADDI r2 1
+LBU  r7 r2
+ADDI r0 1
+ADDI r1 1
+BEQZ r6 l8
+LBU  r3 r0
+JMP  l2
+ADDI r6 -1
+
+// median_i,127
+LBU  r3 r0
+SBU  r3 r1 label:8
+ADDI r0 1
+ADDI r1 1
+
+BEQZ r7 l9
+LBU  r3 r0
+JMP  l1
+ADDI r7 -1
+
+// --- median_127,j --- //
+LLI  r7 0x7f label:9
+LBU  r3 r0 label:3
+SBU  r3 r1
+ADDI r0 1
+ADDI r1 1
+BNEZ r7 l3
+ADDI r7 -1
+
+// finish
+JMP  l4 label:4
+FINISH
+
+// MEM
+//MEM 0x20  0x1234 // m
+//MEM 0x22  0x0004 // n
+//MEM 0x24  0x0000 // m * n
+//MEM 0x200 0x0000 // led

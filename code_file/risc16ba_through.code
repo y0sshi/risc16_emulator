@@ -1,0 +1,59 @@
+// ----- median filter ----- //
+// --- initialize --- //
+LUI  r0 0x80
+LUI  r1 0xc0
+LLI  r7 0x7f
+
+// --- median_0,j --- //
+LBU  r2 r0 label:0
+SBU  r2 r1
+ADDI r0 1
+ADDI r1 1
+BNEZ r7 l0
+ADDI r7 -1
+
+// --- median_i,j --- //
+LLI  r7 0x7d
+
+// median_i,0
+LBU  r2 r0 label:1
+SBU  r2 r1
+ADDI r0 1
+ADDI r1 1
+
+// median_i,j
+LLI r6 0x7d
+LBU  r2 r0 label:2
+SBU  r2 r1
+ADDI r0 1
+ADDI r1 1
+BNEZ r6 l2
+ADDI r6 -1
+
+// median_i,127
+LBU  r2 r0
+SBU  r2 r1
+ADDI r0 1
+ADDI r1 1
+
+BNEZ r7 l1
+ADDI r7 -1
+
+// --- median_127,j --- //
+LLI  r7 0x7f
+LBU  r2 r0 label:3
+SBU  r2 r1
+ADDI r0 1
+ADDI r1 1
+BNEZ r7 l3
+ADDI r7 -1
+
+// finish
+JMP  l4 label:4
+NOP
+
+// MEM
+//MEM 0x20  0x1234 // m
+//MEM 0x22  0x0004 // n
+//MEM 0x24  0x0000 // m * n
+//MEM 0x200 0x0000 // led
